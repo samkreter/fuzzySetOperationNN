@@ -1,4 +1,4 @@
-from .memfuncs import MemFunc
+from .MemFuncs import MemFunc
 import matplotlib.pyplot as plt
 import numpy as np
 

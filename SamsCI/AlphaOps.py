@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from .memfuncs import MemFunc
+from .MemFuncs import MemFunc
 
 #W value for the Yager operators
 w = 2
