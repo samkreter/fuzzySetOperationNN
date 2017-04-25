@@ -219,7 +219,6 @@ class Nueron:
         self.inputs = inputs
         output = 0
 
-
         for i in range(len(inputs)):
             output += inputs[i] * self.weights[i]
 
