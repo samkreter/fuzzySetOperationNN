@@ -37,7 +37,7 @@ def generate_training_full(wideValue=2):
     samples = []
     labels = []
 
-    bs = random.sample(range(0,1000),10)
+    bs = random.sample(range(0,100),100)
 
     for b1 in bs:
         for b2 in bs:
@@ -47,7 +47,7 @@ def generate_training_full(wideValue=2):
     return samples,labels
 
 
-X1,y1 = generate_training_10()
+X1,y1 = generate_training_full()
 train_x, test_x, train_y, test_y = train_test_split(X1,y1,test_size=.2,random_state = 1)
 
 
@@ -109,18 +109,25 @@ def train_network(x):
     optimizer = tf.train.AdamOptimizer().minimize(cost)
 
 
-    n_epochs = 40
+    n_epochs = 700
+    printer = 20
 
     errors = []
 
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
 
+        test = np.array([1,2,2,3,1,2,2,3])
+
+        #print(sess.run(pred,feed_dict={x:[test]}))
+
         if SAVED:
             saver.restore(sess,"model.ckpt")
         else:
             for epoch in range(n_epochs):
-                epoch_loss = 0
+
+                if epoch % printer == 0:
+                    print(sess.run(pred,feed_dict={x:[test]}))
 
                 i = 0
 
@@ -128,15 +135,14 @@ def train_network(x):
 
                 print("Epoch:",epoch,"completed out of:", n_epochs, "Loss:", c)
                 errors.append(c)
+                saver.save(sess,"model.ckpt")
 
-            saver.save(sess,"model.ckpt")
 
 
-        test = np.array([.1,.2,.2,.3,.1,.2,.2,.3])
-        y_pred = tf.Variable([])
+
         print(sess.run(pred,feed_dict = {x:[test]}))
-    #plt.plot(range(n_epochs),errors)
-    #plt.show()
+    plt.plot(range(n_epochs),errors)
+    plt.show()
 
 
 train_network(x)
