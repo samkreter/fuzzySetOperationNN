@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 
-SAVED = False
+SAVED = True
 
 
 def s_round(a):
@@ -123,19 +123,19 @@ def train_network(x):
 
         if SAVED:
             saver.restore(sess,"model.ckpt")
-        else:
-            for epoch in range(n_epochs):
 
-                if epoch % printer == 0:
-                    print(sess.run(pred,feed_dict={x:[test]}))
+        for epoch in range(n_epochs):
 
-                i = 0
+            if epoch % printer == 0:
+                print(sess.run(pred,feed_dict={x:[test]}))
 
-                _,c = sess.run([optimizer,cost],feed_dict = {x: train_x, y: train_y})
+            i = 0
 
-                print("Epoch:",epoch,"completed out of:", n_epochs, "Loss:", c)
-                errors.append(c)
-                saver.save(sess,"model.ckpt")
+            _,c = sess.run([optimizer,cost],feed_dict = {x: train_x, y: train_y})
+
+            print("Epoch:",epoch,"completed out of:", n_epochs, "Loss:", c)
+            errors.append(c)
+            saver.save(sess,"model.ckpt")
 
 
 
