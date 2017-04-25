@@ -6,6 +6,32 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 
+SAVED = False
+
+
+def s_round(a):
+    return int((a * 10) + 0.5) / 10.0
+
+def generate_training_10(wideValue=.1):
+    samples = []
+    labels = []
+    fNumbers = []
+
+    #compute values
+    for b in np.arange(0,1.1,.1):
+        a = s_round(max(0,b - wideValue))
+        c = s_round(min(1,b + wideValue))
+        b = s_round(b)
+        fNumbers.append([a,b,b,c])
+
+
+    #Compute pairs
+    for A in fNumbers:
+        for B in fNumbers:
+            samples.append(A + B)
+            labels.append([min(1,s_round(i[0] + i[1])) for i in zip(A,B) ])
+
+    return samples,labels
 
 def generate_training_full(wideValue=2):
     samples = []
@@ -21,7 +47,7 @@ def generate_training_full(wideValue=2):
     return samples,labels
 
 
-X1,y1 = generate_training_full()
+X1,y1 = generate_training_10()
 train_x, test_x, train_y, test_y = train_test_split(X1,y1,test_size=.2,random_state = 1)
 
 
@@ -32,8 +58,11 @@ n_nodes_hl3 = 500
 n_classes = 4
 
 
-x = tf.placeholder('float',[None,len(train_x[0])])
-y = tf.placeholder('float',[None,4])
+# x = tf.placeholder('float',[None,len(train_x[0])])
+# y = tf.placeholder('float',[None,4])
+
+x = tf.placeholder('float')
+y = tf.placeholder('float')
 
 
 def neural_net_model(data):
@@ -51,13 +80,16 @@ def neural_net_model(data):
                   'biases':tf.Variable(tf.random_normal([n_classes]))}
 
     l1 = tf.add(tf.matmul(data,hidden_1_layer['weights']), hidden_1_layer['biases'])
-    l1 = tf.nn.relu(l1)
+    #l1 = tf.nn.relu(l1)
+    l1 = tf.nn.sigmoid(l1)
 
     l2 = tf.add(tf.matmul(l1,hidden_2_layer['weights']), hidden_2_layer['biases'])
-    l2 = tf.nn.relu(l2)
+    #l2 = tf.nn.relu(l2)
+    l2 = tf.nn.sigmoid(l2)
 
     l3 = tf.add(tf.matmul(l2,hidden_3_layer['weights']), hidden_3_layer['biases'])
-    l3 = tf.nn.relu(l3)
+    #l3 = tf.nn.relu(l3)
+    l3 = tf.nn.sigmoid(l3)
 
 
     output = tf.add(tf.matmul(l3,output_layer['weights']), output_layer['biases'])
@@ -65,12 +97,14 @@ def neural_net_model(data):
 
     return output
 
-saver = tf.train.Saver()
+
 
 def train_network(x):
     pred = neural_net_model(x)
     cost = tf.reduce_sum(tf.pow(pred - y,2))/(len(train_y))
     #cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(pred,y))
+
+    saver = tf.train.Saver()
 
     optimizer = tf.train.AdamOptimizer().minimize(cost)
 
@@ -82,20 +116,28 @@ def train_network(x):
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
 
-        for epoch in range(n_epochs):
-            epoch_loss = 0
+        if SAVED:
+            saver.restore(sess,"model.ckpt")
+        else:
+            for epoch in range(n_epochs):
+                epoch_loss = 0
 
-            i = 0
+                i = 0
 
-            _,c = sess.run([optimizer,cost],feed_dict = {x: train_x, y: train_y})
+                _,c = sess.run([optimizer,cost],feed_dict = {x: train_x, y: train_y})
 
-            print("Epoch:",epoch,"completed out of:", n_epochs, "Loss:", c)
-            errors.append(c)
+                print("Epoch:",epoch,"completed out of:", n_epochs, "Loss:", c)
+                errors.append(c)
+
+            saver.save(sess,"model.ckpt")
 
 
-    plt.plot(range(n_epochs),errors)
+        test = np.array([.1,.2,.2,.3,.1,.2,.2,.3])
+        y_pred = tf.Variable([])
+        print(sess.run(pred,feed_dict = {x:[test]}))
+    #plt.plot(range(n_epochs),errors)
     #plt.show()
-    pred.eval(feed_dict = {x:[1,2,2,3,1,2,2,3]})
+
 
 train_network(x)
 
