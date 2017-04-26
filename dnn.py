@@ -8,6 +8,9 @@ import random
 import pickle
 import os
 
+#All my CI code that i've written
+from SamsCI import *
+
 SAVED = False
 
 
@@ -35,21 +38,27 @@ def generate_training_10(wideValue=.1):
 
     return samples,labels
 
-def generate_training_full(wideValue=2):
+def generate_training_full(wideValue=2,op="add"):
     samples = []
     labels = []
+    alpha = AlphaOps(op).alphaCuts
+    bs = random.sample(list(np.arange(0,10,.01)),500)
 
-    bs = random.sample(list(np.arange(0,50,.1)),500)
 
     for b1 in bs:
         for b2 in bs:
-            b = b1 + b2
-            samples.append([b1 - wideValue, b1, b1, b1 + wideValue, b2 - wideValue, b2, b2, b2+ wideValue])
-            labels.append([b - wideValue, b, b, b + wideValue])
+            A = list(map(s_round,[b1 - wideValue, b1, b1, b1 + wideValue]))
+            B = list(map(s_round,[b2 - wideValue, b2, b2, b2 + wideValue]))
+            label = list(map(s_round,alpha([A,B])))
+
+            samples.append(A + B)
+            labels.append(label)
     return samples,labels
 
 
 X1,y1 = generate_training_full()
+
+print(list(zip(X1,y1)))
 train_x, test_x, train_y, test_y = train_test_split(X1,y1,test_size=.2,random_state = 1)
 
 
@@ -110,7 +119,7 @@ def train_network(x):
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
 
-        test = np.array([1,2,2,3,1,2,2,3])
+        test = np.array([5,6,6,7,1,2,2,3])
         #test = np.array([.1,.2,.2,.3,.1,.2,.2,.3])
 
         #print(sess.run(pred,feed_dict={x:[test]}))

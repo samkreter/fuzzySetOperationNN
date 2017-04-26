@@ -16,20 +16,13 @@ from SamsCI import *
 #TODO
 # FInd different ways to represnet Alpha cuts in the Neural Net
 
-a = AlphaOps("add").alphaCuts
 
-A = [.2,.5,.7]
-B = [.3,.5,.7]
-
-f = a([A,B])
 
 
 
 def s_round(a):
     return int((a * 10) + 0.5) / 10.0
 
-
-def generate_alpha(wideValue=.1,op="add"):
 
 
 def generate_training_full(wideValue=2):
@@ -45,10 +38,12 @@ def generate_training_full(wideValue=2):
             labels.append([b - wideValue, b, b, b + wideValue])
     return samples,labels
 
-def generate_training_10(wideValue=.1):
+def generate_training_10(wideValue=.1,op="add"):
     samples = []
     labels = []
     fNumbers = []
+    alpha = AlphaOps(op).alphaCuts
+
 
     #compute values
     for b in np.arange(0,1.1,.1):
@@ -62,9 +57,12 @@ def generate_training_10(wideValue=.1):
     for A in fNumbers:
         for B in fNumbers:
             samples.append(A + B)
-            labels.append([min(1,s_round(i[0] + i[1])) for i in zip(A,B) ])
+            #label = map(lambda x: s_round(x),a([A,B]))
+            labels.append(alpha([A,B]))
+            #labels.append([min(1,s_round(i[0] + i[1])) for i in zip(A,B) ])
 
     return samples,labels
+
 
 
 def getError(errors):
@@ -134,11 +132,12 @@ def base_case(X,y):
         for k in trange:
             preds = list(map(lambda x: s_round(x),nn.predict(X_test[k])))
 
-            errors.append([y_test[k],preds])
+            errors.append((y_test[k],preds))
 
-        #print(errors)
-        print(getError(errors))
-        main_errors.append(getError(errors))
+        y_true,y_pred = zip(*errors)
+        print(mean_squared_error(y_true,y_pred))
+        #print(getError(errors))
+        main_errors.append(mean_squared_error(y_true,y_pred))
 
 
     plt.plot(range(len(main_errors)),main_errors)
@@ -151,8 +150,10 @@ def base_case(X,y):
 if __name__ == '__main__':
    X, y = generate_training_10()
    X1,y1 = generate_training_full()
-   print(y1)
-   full_case(X1,y1)
+
+   base_case(X,y)
+
+
 
 # m1 = MemFunc('tri',A)
 # m2 = MemFunc('tri',B)
