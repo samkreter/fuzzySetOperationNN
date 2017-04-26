@@ -75,27 +75,27 @@ n_classes = 4
 x = tf.placeholder('float')
 y = tf.placeholder('float')
 
+weights = {
+    'h1_layer': tf.Variable(tf.random_normal([len(train_x[0]),n_nodes_hl1])),
+    'h2_layer': tf.Variable(tf.random_normal([n_nodes_hl1,n_nodes_hl2])),
+    'output_layer': tf.Variable(tf.random_normal([n_nodes_hl2, n_classes]))
+}
+
+biases = {
+    'h1_layer': tf.Variable(tf.random_normal([n_nodes_hl1])),
+    'h2_layer': tf.Variable(tf.random_normal([n_nodes_hl2])),
+    'output_layer': tf.Variable(tf.random_normal([n_classes]))
+}
 
 def neural_net_model(data):
 
-
-    hidden_1_layer = {'weights':tf.Variable(tf.random_normal([len(train_x[0]),n_nodes_hl1])),
-                  'biases':tf.Variable(tf.random_normal([n_nodes_hl1]))}
-
-    hidden_2_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl1,n_nodes_hl2]),name="l2_weights"),
-                  'biases':tf.Variable(tf.random_normal([n_nodes_hl2]))}
-
-    output_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl2, n_classes])),
-                  'biases':tf.Variable(tf.random_normal([n_classes]))}
-
-
-    l1 = tf.add(tf.matmul(data,hidden_1_layer['weights']), hidden_1_layer['biases'])
+    l1 = tf.add(tf.matmul(data,weights['h1_layer']), biases['h1_layer'])
     l1 = tf.nn.tanh(l1)
 
-    l2 = tf.add(tf.matmul(l1,hidden_2_layer['weights']), hidden_2_layer['biases'])
+    l2 = tf.add(tf.matmul(l1,weights['h2_layer']), biases['h2_layer'])
     l2 = tf.nn.tanh(l2)
 
-    output = tf.add(tf.matmul(l2,output_layer['weights']), output_layer['biases'])
+    output = tf.add(tf.matmul(l2,weights['output_layer']), biases['output_layer'])
 
     return output
 
@@ -107,8 +107,12 @@ def train_network(x):
     cost = tf.reduce_sum(tf.pow(pred - y,2))/(len(train_y))
     #cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(pred,y))
 
-    regularizer = tf.nn.l2_loss(tf.get_default_graph().get_tensor_by_name("l2_weights:0"))
-    cost = tf.reduce_mean(cost + beta * regularizer)
+
+    cost = tf.reduce_mean(cost +
+        beta*tf.nn.l2_loss(weights['h1_layer']) +
+        beta*tf.nn.l2_loss(weights['h2_layer']) +
+        beta*tf.nn.l2_loss(weights['output_layer']))
+
 
 
     saver = tf.train.Saver()
