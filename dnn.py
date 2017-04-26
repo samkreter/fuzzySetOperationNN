@@ -5,8 +5,10 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 import random
+import pickle
+import os
 
-SAVED = True
+SAVED = False
 
 
 def s_round(a):
@@ -37,7 +39,7 @@ def generate_training_full(wideValue=2):
     samples = []
     labels = []
 
-    bs = random.sample(range(0,100),100)
+    bs = random.sample(list(np.arange(0,50,.1)),500)
 
     for b1 in bs:
         for b2 in bs:
@@ -51,9 +53,9 @@ X1,y1 = generate_training_full()
 train_x, test_x, train_y, test_y = train_test_split(X1,y1,test_size=.2,random_state = 1)
 
 
-n_nodes_hl1 = 500
-n_nodes_hl2 = 500
-n_nodes_hl3 = 500
+n_nodes_hl1 = 20
+n_nodes_hl2 = 20
+n_nodes_hl3 = 20
 
 n_classes = 4
 
@@ -67,33 +69,24 @@ y = tf.placeholder('float')
 
 def neural_net_model(data):
 
-    hidden_1_layer = {'weights':tf.Variable(tf.random_normal([len(train_x[0]),n_nodes_hl1])),
-                      'biases':tf.Variable(tf.random_normal([n_nodes_hl1]))}
 
-    hidden_2_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl1, n_nodes_hl2])),
+    hidden_1_layer = {'weights':tf.Variable(tf.random_normal([len(train_x[0]),n_nodes_hl1])),
+                  'biases':tf.Variable(tf.random_normal([n_nodes_hl1]))}
+
+    hidden_2_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl1,n_nodes_hl2])),
                   'biases':tf.Variable(tf.random_normal([n_nodes_hl2]))}
 
-    hidden_3_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl2, n_nodes_hl3])),
-                  'biases':tf.Variable(tf.random_normal([n_nodes_hl3]))}
-
-    output_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl3, n_classes])),
+    output_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl2, n_classes])),
                   'biases':tf.Variable(tf.random_normal([n_classes]))}
 
+
     l1 = tf.add(tf.matmul(data,hidden_1_layer['weights']), hidden_1_layer['biases'])
-    #l1 = tf.nn.relu(l1)
     l1 = tf.nn.sigmoid(l1)
 
     l2 = tf.add(tf.matmul(l1,hidden_2_layer['weights']), hidden_2_layer['biases'])
-    #l2 = tf.nn.relu(l2)
     l2 = tf.nn.sigmoid(l2)
 
-    l3 = tf.add(tf.matmul(l2,hidden_3_layer['weights']), hidden_3_layer['biases'])
-    #l3 = tf.nn.relu(l3)
-    l3 = tf.nn.sigmoid(l3)
-
-
-    output = tf.add(tf.matmul(l3,output_layer['weights']), output_layer['biases'])
-
+    output = tf.add(tf.matmul(l2,output_layer['weights']), output_layer['biases'])
 
     return output
 
@@ -109,7 +102,7 @@ def train_network(x):
     optimizer = tf.train.AdamOptimizer().minimize(cost)
 
 
-    n_epochs = 700
+    n_epochs = 1000000
     printer = 20
 
     errors = []
@@ -118,31 +111,40 @@ def train_network(x):
         sess.run(tf.initialize_all_variables())
 
         test = np.array([1,2,2,3,1,2,2,3])
+        #test = np.array([.1,.2,.2,.3,.1,.2,.2,.3])
 
         #print(sess.run(pred,feed_dict={x:[test]}))
 
-        if SAVED:
+
+        try:
+            with open("epoch.log","rb") as f:
+                epoch = pickle.load(f)
+        except:
+            epoch = 0
+
+
+        if epoch > 0:
             saver.restore(sess,"model.ckpt")
 
-        for epoch in range(n_epochs):
+        while epoch < n_epochs:
 
             if epoch % printer == 0:
                 print(sess.run(pred,feed_dict={x:[test]}))
 
-            i = 0
 
             _,c = sess.run([optimizer,cost],feed_dict = {x: train_x, y: train_y})
 
             print("Epoch:",epoch,"completed out of:", n_epochs, "Loss:", c)
-            errors.append(c)
+
+            #save the epoch we are currently on
+            with open("epoch.log","wb") as f:
+                pickle.dump(epoch,f)
+            #errors.append(c)
             saver.save(sess,"model.ckpt")
+            epoch += 1
 
-
-
-
+        os.remove("epoch.log")
         print(sess.run(pred,feed_dict = {x:[test]}))
-    plt.plot(range(n_epochs),errors)
-    plt.show()
 
 
 train_network(x)

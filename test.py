@@ -28,6 +28,10 @@ f = a([A,B])
 def s_round(a):
     return int((a * 10) + 0.5) / 10.0
 
+
+def generate_alpha(wideValue=.1,op="add"):
+
+
 def generate_training_full(wideValue=2):
     samples = []
     labels = []
