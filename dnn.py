@@ -58,7 +58,7 @@ def generate_training_full(wideValue=2,op="add"):
 
 X1,y1 = generate_training_full()
 
-print(list(zip(X1,y1)))
+
 train_x, test_x, train_y, test_y = train_test_split(X1,y1,test_size=.2,random_state = 1)
 
 
@@ -82,7 +82,7 @@ def neural_net_model(data):
     hidden_1_layer = {'weights':tf.Variable(tf.random_normal([len(train_x[0]),n_nodes_hl1])),
                   'biases':tf.Variable(tf.random_normal([n_nodes_hl1]))}
 
-    hidden_2_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl1,n_nodes_hl2])),
+    hidden_2_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl1,n_nodes_hl2]),name="l2_weights"),
                   'biases':tf.Variable(tf.random_normal([n_nodes_hl2]))}
 
     output_layer = {'weights':tf.Variable(tf.random_normal([n_nodes_hl2, n_classes])),
@@ -90,25 +90,31 @@ def neural_net_model(data):
 
 
     l1 = tf.add(tf.matmul(data,hidden_1_layer['weights']), hidden_1_layer['biases'])
-    l1 = tf.nn.sigmoid(l1)
+    l1 = tf.nn.tanh(l1)
 
     l2 = tf.add(tf.matmul(l1,hidden_2_layer['weights']), hidden_2_layer['biases'])
-    l2 = tf.nn.sigmoid(l2)
+    l2 = tf.nn.tanh(l2)
 
     output = tf.add(tf.matmul(l2,output_layer['weights']), output_layer['biases'])
 
     return output
 
 
+beta = .01
 
 def train_network(x):
     pred = neural_net_model(x)
     cost = tf.reduce_sum(tf.pow(pred - y,2))/(len(train_y))
     #cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(pred,y))
 
+    regularizer = tf.nn.l2_loss(tf.get_default_graph().get_tensor_by_name("l2_weights:0"))
+    cost = tf.reduce_mean(cost + beta * regularizer)
+
+
     saver = tf.train.Saver()
 
     optimizer = tf.train.AdamOptimizer().minimize(cost)
+
 
 
     n_epochs = 1000000
