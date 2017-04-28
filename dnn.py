@@ -38,25 +38,61 @@ def generate_training_10(wideValue=.1):
 
     return samples,labels
 
-def generate_training_full(wideValue=2,op="add"):
-    samples = []
-    labels = []
-    alpha = AlphaOps(op).alphaCuts
-    bs = random.sample(list(np.arange(0,10,.01)),500)
+def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data.pickel'):
+    try:
+        with open(filename,'rb') as f:
+            X1,y1 = pickle.load(f)
+            return x1,y1
+    except:
+
+        samples = []
+        labels = []
+        alpha = AlphaOps(op).alphaCuts
+        bs = random.sample(list(np.arange(0,10,.01)),500)
 
 
-    for b1 in bs:
-        for b2 in bs:
-            A = list(map(s_round,[b1 - wideValue, b1, b1, b1 + wideValue]))
-            B = list(map(s_round,[b2 - wideValue, b2, b2, b2 + wideValue]))
-            label = list(map(s_round,alpha([A,B])))
+        for b1 in bs:
+            for b2 in bs:
+                A = list(map(s_round,[b1 - wideValue, b1, b1, b1 + wideValue]))
+                B = list(map(s_round,[b2 - wideValue, b2, b2, b2 + wideValue]))
+                label = list(map(s_round,alpha([A,B])))
 
-            samples.append(A + B)
-            labels.append(label)
-    return samples,labels
+                samples.append(A + B)
+                labels.append(label)
+
+        with open(filename,'wb') as f:
+            pickle.dump((samples,labels),f)
+        return samples,labels
 
 
-X1,y1 = generate_training_full()
+#Only need to generate this once then save the results
+# try:
+#     with open('gen_data.pickle','rb') as f:
+#         X1,y1 = pickle.load(f)
+# except:
+#     X1,y1 = generate_training_full()
+#     with open('gen_data.pickle','wb') as f:
+#         pickle.dump((X1,y1),f)
+
+X1,y1 = generate_training_full(op='sub')
+
+# train_x = [[1,2,2,3,1,2,2,3],
+#           [5,6,6,7,1,2,2,3],
+#           [1,2,2,3,5,6,6,7]]
+
+# train_y = [[2,4,4,6],
+#            [6,8,8,10],
+#            [6,8,8,10]]
+
+# test_x = [[1,2,2,3,1,2,2,3],
+#           [5,6,6,7,1,2,2,3],
+#           [1,2,2,3,5,6,6,7]]
+
+# test_y = [[2,4,4,6],
+#            [6,8,8,10],
+#            [6,8,8,10]]
+
+
 
 
 train_x, test_x, train_y, test_y = train_test_split(X1,y1,test_size=.2,random_state = 1)
@@ -90,10 +126,10 @@ biases = {
 def neural_net_model(data):
 
     l1 = tf.add(tf.matmul(data,weights['h1_layer']), biases['h1_layer'])
-    l1 = tf.nn.tanh(l1)
+    l1 = tf.nn.sigmoid(l1)
 
     l2 = tf.add(tf.matmul(l1,weights['h2_layer']), biases['h2_layer'])
-    l2 = tf.nn.tanh(l2)
+    l2 = tf.nn.sigmoid(l2)
 
     output = tf.add(tf.matmul(l2,weights['output_layer']), biases['output_layer'])
 
@@ -105,13 +141,13 @@ beta = .01
 def train_network(x):
     pred = neural_net_model(x)
     cost = tf.reduce_sum(tf.pow(pred - y,2))/(len(train_y))
-    #cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(pred,y))
 
 
-    cost = tf.reduce_mean(cost +
-        beta*tf.nn.l2_loss(weights['h1_layer']) +
-        beta*tf.nn.l2_loss(weights['h2_layer']) +
-        beta*tf.nn.l2_loss(weights['output_layer']))
+
+    # cost = tf.reduce_mean(cost +
+    #     beta*tf.nn.l2_loss(weights['h1_layer']) +
+    #     beta*tf.nn.l2_loss(weights['h2_layer']) +
+    #     beta*tf.nn.l2_loss(weights['output_layer']))
 
 
 
@@ -149,7 +185,8 @@ def train_network(x):
 
             if epoch % printer == 0:
                 print(sess.run(pred,feed_dict={x:[test]}))
-
+                preds = sess.run(pred, feed_dict={x:test_x})
+                print(getAccuarcy(preds,test_y))
 
             _,c = sess.run([optimizer,cost],feed_dict = {x: train_x, y: train_y})
 
@@ -163,9 +200,43 @@ def train_network(x):
             epoch += 1
 
         os.remove("epoch.log")
+
         print(sess.run(pred,feed_dict = {x:[test]}))
 
+        print()
 
-train_network(x)
+
+def getAccuarcy(preds,truths):
+    correct = 0
+    for pred,truth in zip(preds,truths):
+        pred = list(map(round,pred))
+        truth = list(map(round,truth))
+        if pred == truth:
+            correct += 1
+
+    return (correct / len(preds)) * 100
+
+
+def test_network(x):
+    saver = tf.train.Saver()
+
+
+    with tf.Session() as sess:
+        #sess.run(tf.initialize_all_variables())
+
+        saver.restore(sess,"model.ckpt")
+
+        all_vars = tf.get_collection('vars')
+        for v in all_vars:
+            v_ = sess.run(v)
+            print(v_)
+
+        #preds = sess.run(pred, feed_dict={x:test_x})
+
+        #print(getAccuarcy(preds,test_y))
+
+if __name__ == '__main__':
+    train_network(x)
+    #test_network(x)
 
 
