@@ -38,13 +38,14 @@ def generate_training_10(wideValue=.1):
 
     return samples,labels
 
-def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data.pickel'):
+def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data'):
     try:
-        with open(filename,'rb') as f:
-            X1,y1 = pickle.load(f)
-            return x1,y1
-    except:
+        with open(filename + "_" + op + ".pickle",'rb') as f:
+            samples,labels = pickle.load(f)
+            print("Reading data from " + filename + "_" + op + ".pickle")
 
+    except:
+        print("testing")
         samples = []
         labels = []
         alpha = AlphaOps(op).alphaCuts
@@ -60,9 +61,10 @@ def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data.p
                 samples.append(A + B)
                 labels.append(label)
 
-        with open(filename,'wb') as f:
+        with open(filename + "_" + op + ".pickle",'wb') as f:
             pickle.dump((samples,labels),f)
-        return samples,labels
+
+    return samples,labels
 
 
 #Only need to generate this once then save the results
@@ -75,6 +77,7 @@ def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data.p
 #         pickle.dump((X1,y1),f)
 
 X1,y1 = generate_training_full(op='sub')
+X2,y2 = generate_training_full()
 
 # train_x = [[1,2,2,3,1,2,2,3],
 #           [5,6,6,7,1,2,2,3],
