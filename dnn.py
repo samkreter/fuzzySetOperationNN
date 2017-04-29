@@ -38,14 +38,25 @@ def generate_training_10(wideValue=.1):
 
     return samples,labels
 
-def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data'):
+def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data',featureOp=False):
+
+    f_op_map = {
+        'add':[1],
+        'sub':[0]
+    }
+
+
+    if featureOp:
+        add_feature = f_op_map[op]
+    else:
+        add_feature = []
+
     try:
-        with open(filename + "_" + op + ".pickle",'rb') as f:
+        with open(filename + "_" + op + "_" + str(featureOp) + ".pickle",'rb') as f:
             samples,labels = pickle.load(f)
             print("Reading data from " + filename + "_" + op + ".pickle")
 
     except:
-        print("testing")
         samples = []
         labels = []
         alpha = AlphaOps(op).alphaCuts
@@ -58,42 +69,25 @@ def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data')
                 B = list(map(s_round,[b2 - wideValue, b2, b2, b2 + wideValue]))
                 label = list(map(s_round,alpha([A,B])))
 
-                samples.append(A + B)
+                samples.append(add_feature + A + B)
                 labels.append(label)
 
-        with open(filename + "_" + op + ".pickle",'wb') as f:
+        with open(filename + "_" + op + "_" + str(featureOp) + ".pickle",'wb') as f:
             pickle.dump((samples,labels),f)
 
     return samples,labels
 
 
-#Only need to generate this once then save the results
-# try:
-#     with open('gen_data.pickle','rb') as f:
-#         X1,y1 = pickle.load(f)
-# except:
-#     X1,y1 = generate_training_full()
-#     with open('gen_data.pickle','wb') as f:
-#         pickle.dump((X1,y1),f)
+def create_combined(X1,y1,X2,y2):
+    X = X1 + X2
+    y = y1 + y2
+
+    X,y = zip(*random.shuffle(list(zip(X,y))))
+    return X,y
 
 X1,y1 = generate_training_full(op='sub')
 X2,y2 = generate_training_full()
 
-# train_x = [[1,2,2,3,1,2,2,3],
-#           [5,6,6,7,1,2,2,3],
-#           [1,2,2,3,5,6,6,7]]
-
-# train_y = [[2,4,4,6],
-#            [6,8,8,10],
-#            [6,8,8,10]]
-
-# test_x = [[1,2,2,3,1,2,2,3],
-#           [5,6,6,7,1,2,2,3],
-#           [1,2,2,3,5,6,6,7]]
-
-# test_y = [[2,4,4,6],
-#            [6,8,8,10],
-#            [6,8,8,10]]
 
 
 
