@@ -203,7 +203,6 @@ def train_network(x):
 
         print(sess.run(pred,feed_dict = {x:[test]}))
 
-        print()
 
 
 def getAccuarcy(preds,truths):
