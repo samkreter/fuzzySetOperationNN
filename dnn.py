@@ -164,14 +164,14 @@ def train_network(x):
             beta*tf.nn.l2_loss(weights['output_layer']))
 
 
-    file = File(sys.argv[3])
+    file = File(sys.argv[1] + "_" + sys.argv[2] + "_log.csv")
     saver = tf.train.Saver()
 
     optimizer = tf.train.AdamOptimizer().minimize(cost)
 
 
 
-    n_epochs = 5000
+    n_epochs = 3
     printer = 10
 
     errors = []
@@ -190,6 +190,9 @@ def train_network(x):
 
         if epoch > 0:
             saver.restore(sess,"./model_" + sys.argv[1] + "_" + sys.argv[2] + ".ckpt")
+
+
+        print("Starting: " + sys.argv[1] + "_" + sys.argv[2])
 
         while epoch < n_epochs:
 

@@ -2,6 +2,11 @@ import os
 import sys
 
 
+tests = ["add","sub","combined"]
+regs = ['reg','noreg']
 
 
-os.system("python3 dnn.py reg sub log.csv")
+
+for test in tests:
+    for reg in regs:
+        os.system("python3 dnn.py " + reg + " " + test)
