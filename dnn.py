@@ -7,12 +7,16 @@ import numpy as np
 import random
 import pickle
 import os
+import sys
 
 #All my CI code that i've written
 from SamsCI import *
 
-SAVED = False
+
 DATA_FOLDER = "data/"
+
+
+REGUALIZE = True if sys.argv[1] == "reg" else False
 
 
 def s_round(a):
@@ -92,12 +96,15 @@ def create_combined(X1,y1,X2,y2):
     return X,y
 
 
+if sys.argv[2] == "combined":
+    X_sub_feat,y_sub_feat = generate_training_full(op='sub',featureOp=True)
+    X_add_feat,y_add_feat = generate_training_full(op='add',featureOp=True)
+    X,y = create_combined(X_sub_feat,y_sub_feat,X_add_feat,y_add_feat)
+elif sys.argv[2] == "sub":
+    X,y = generate_training_full(op='sub',featureOp=False)
+else:
+    X,y = generate_training_full(op='add',featureOp=False)
 
-X1,y1 = generate_training_full(op='sub',featureOp=True)
-X2,y2 = generate_training_full(op='add',featureOp=True)
-
-
-X,y = create_combined(X1,y1,X2,y2)
 
 
 train_x, test_x, train_y, test_y = train_test_split(X,y,test_size=.2,random_state = 1)
@@ -141,39 +148,37 @@ def neural_net_model(data):
     return output
 
 
-beta = .01
+
 
 def train_network(x):
     pred = neural_net_model(x)
     cost = tf.reduce_sum(tf.pow(pred - y,2))/(len(train_y))
 
 
+    beta = .01
 
-    # cost = tf.reduce_mean(cost +
-    #     beta*tf.nn.l2_loss(weights['h1_layer']) +
-    #     beta*tf.nn.l2_loss(weights['h2_layer']) +
-    #     beta*tf.nn.l2_loss(weights['output_layer']))
+    if REGUALIZE:
+        cost = tf.reduce_mean(cost +
+            beta*tf.nn.l2_loss(weights['h1_layer']) +
+            beta*tf.nn.l2_loss(weights['h2_layer']) +
+            beta*tf.nn.l2_loss(weights['output_layer']))
 
 
-    file = File('logs.csv')
+    file = File(sys.argv[3])
     saver = tf.train.Saver()
 
     optimizer = tf.train.AdamOptimizer().minimize(cost)
 
 
 
-    n_epochs = 1000000
-    printer = 20
+    n_epochs = 5000
+    printer = 10
 
     errors = []
 
     with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
         sess.run(tf.initialize_all_variables())
 
-        test = np.array([1,5,6,6,7,1,2,2,3])
-        #test = np.array([.1,.2,.2,.3,.1,.2,.2,.3])
-
-        #print(sess.run(pred,feed_dict={x:[test]}))
 
 
         try:
@@ -184,7 +189,7 @@ def train_network(x):
 
 
         if epoch > 0:
-            saver.restore(sess,"./model.ckpt")
+            saver.restore(sess,"./model_" + sys.argv[1] + "_" + sys.argv[2] + "_" + ".ckpt")
 
         while epoch < n_epochs:
 
@@ -194,7 +199,7 @@ def train_network(x):
 
 
             if epoch % printer == 0:
-                print(sess.run(pred,feed_dict={x:[test]}))
+                #print(sess.run(pred,feed_dict={x:[test]}))
                 preds = sess.run(pred, feed_dict={x:test_x})
                 accuracy = getAccuarcy(preds,test_y)
                 print(accuracy)
@@ -207,12 +212,12 @@ def train_network(x):
             with open("epoch.log","wb") as f:
                 pickle.dump(epoch,f)
             #errors.append(c)
-            saver.save(sess,"model.ckpt")
+            saver.save(sess,"model_" + sys.argv[1] + "_" + sys.argv[2] + "_" + ".ckpt")
             epoch += 1
 
         os.remove("epoch.log")
 
-        print(sess.run(pred,feed_dict = {x:[test]}))
+        #print(sess.run(pred,feed_dict = {x:[test]}))
 
 
 
@@ -246,6 +251,7 @@ def test_network(x):
         #print(getAccuarcy(preds,test_y))
 
 if __name__ == '__main__':
+
     train_network(x)
     #test_network(x)
 
