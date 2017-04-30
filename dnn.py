@@ -12,6 +12,7 @@ import os
 from SamsCI import *
 
 SAVED = False
+DATA_FOLDER = "data/"
 
 
 def s_round(a):
@@ -52,7 +53,7 @@ def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data',
         add_feature = []
 
     try:
-        with open(filename + "_" + op + "_" + str(featureOp) + ".pickle",'rb') as f:
+        with open(DATA_FOLDER + filename + "_" + op + "_" + str(featureOp) + ".pickle",'rb') as f:
             samples,labels = pickle.load(f)
             print("Reading: " + filename + "_" + op + "_" + str(featureOp) + ".pickle")
 
@@ -73,7 +74,7 @@ def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data',
                 samples.append(add_feature + A + B)
                 labels.append(label)
 
-        with open(filename + "_" + op + "_" + str(featureOp) + ".pickle",'wb') as f:
+        with open(DATA_FOLDER + filename + "_" + op + "_" + str(featureOp) + ".pickle",'wb') as f:
             pickle.dump((samples,labels),f)
 
     return samples,labels
@@ -166,7 +167,7 @@ def train_network(x):
 
     errors = []
 
-    with tf.Session() as sess:
+    with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
         sess.run(tf.initialize_all_variables())
 
         test = np.array([1,5,6,6,7,1,2,2,3])
