@@ -171,12 +171,12 @@ def train_network(x):
 
 
 
-    n_epochs = 3
+    n_epochs = 5000
     printer = 10
 
     errors = []
 
-    with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
+    with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
 
 
@@ -201,12 +201,12 @@ def train_network(x):
 
 
 
-            if epoch % printer == 0:
+            #if epoch % printer == 0:
                 #print(sess.run(pred,feed_dict={x:[test]}))
-                preds = sess.run(pred, feed_dict={x:test_x})
-                accuracy = getAccuarcy(preds,test_y)
-                print(accuracy)
-                file.writeA([c,accuracy])
+            preds = sess.run(pred, feed_dict={x:test_x})
+            accuracy = getAccuarcy(preds,test_y)
+            print(accuracy)
+            file.writeA([c,accuracy])
 
 
             print("Epoch:",epoch,"completed out of:", n_epochs, "Loss:", c)
