@@ -184,7 +184,7 @@ def train_network(x):
 
 
         if epoch > 0:
-            saver.restore(sess,"model.ckpt")
+            saver.restore(sess,"./model.ckpt")
 
         while epoch < n_epochs:
 
