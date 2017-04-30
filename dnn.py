@@ -54,9 +54,10 @@ def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data',
     try:
         with open(filename + "_" + op + "_" + str(featureOp) + ".pickle",'rb') as f:
             samples,labels = pickle.load(f)
-            print("Reading data from " + filename + "_" + op + ".pickle")
+            print("Reading: " + filename + "_" + op + "_" + str(featureOp) + ".pickle")
 
     except:
+        print("Generating: " + filename + "_" + op + "_" + str(featureOp) + ".pickle")
         samples = []
         labels = []
         alpha = AlphaOps(op).alphaCuts
@@ -82,17 +83,23 @@ def create_combined(X1,y1,X2,y2):
     X = X1 + X2
     y = y1 + y2
 
-    X,y = zip(*random.shuffle(list(zip(X,y))))
+    combined = list(zip(X,y))
+    random.shuffle(combined)
+
+    X,y = zip(*combined)
+
     return X,y
 
-X1,y1 = generate_training_full(op='sub')
-X2,y2 = generate_training_full()
 
 
+X1,y1 = generate_training_full(op='sub',featureOp=True)
+X2,y2 = generate_training_full(op='add',featureOp=True)
 
 
+X,y = create_combined(X1,y1,X2,y2)
 
-train_x, test_x, train_y, test_y = train_test_split(X1,y1,test_size=.2,random_state = 1)
+
+train_x, test_x, train_y, test_y = train_test_split(X,y,test_size=.2,random_state = 1)
 
 
 n_nodes_hl1 = 20
@@ -147,7 +154,7 @@ def train_network(x):
     #     beta*tf.nn.l2_loss(weights['output_layer']))
 
 
-
+    file = File('logs.csv')
     saver = tf.train.Saver()
 
     optimizer = tf.train.AdamOptimizer().minimize(cost)
@@ -162,7 +169,7 @@ def train_network(x):
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
 
-        test = np.array([5,6,6,7,1,2,2,3])
+        test = np.array([1,5,6,6,7,1,2,2,3])
         #test = np.array([.1,.2,.2,.3,.1,.2,.2,.3])
 
         #print(sess.run(pred,feed_dict={x:[test]}))
@@ -180,12 +187,18 @@ def train_network(x):
 
         while epoch < n_epochs:
 
+
+            _,c = sess.run([optimizer,cost],feed_dict = {x: train_x, y: train_y})
+
+
+
             if epoch % printer == 0:
                 print(sess.run(pred,feed_dict={x:[test]}))
                 preds = sess.run(pred, feed_dict={x:test_x})
-                print(getAccuarcy(preds,test_y))
+                accuracy = getAccuarcy(preds,test_y)
+                print(accuracy)
+                file.writeA([c,accuracy])
 
-            _,c = sess.run([optimizer,cost],feed_dict = {x: train_x, y: train_y})
 
             print("Epoch:",epoch,"completed out of:", n_epochs, "Loss:", c)
 
