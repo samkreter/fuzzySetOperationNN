@@ -189,7 +189,7 @@ def train_network(x):
 
 
         if epoch > 0:
-            saver.restore(sess,"./model_" + sys.argv[1] + "_" + sys.argv[2] + "_" + ".ckpt")
+            saver.restore(sess,"./model_" + sys.argv[1] + "_" + sys.argv[2] + ".ckpt")
 
         while epoch < n_epochs:
 
@@ -212,7 +212,7 @@ def train_network(x):
             with open("epoch.log","wb") as f:
                 pickle.dump(epoch,f)
             #errors.append(c)
-            saver.save(sess,"model_" + sys.argv[1] + "_" + sys.argv[2] + "_" + ".ckpt")
+            saver.save(sess,"model_" + sys.argv[1] + "_" + sys.argv[2] + ".ckpt")
             epoch += 1
 
         os.remove("epoch.log")
