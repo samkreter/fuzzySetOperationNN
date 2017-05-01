@@ -84,9 +84,14 @@ def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data',
     return samples,labels
 
 
-def create_combined(X1,y1,X2,y2):
-    X = X1 + X2
-    y = y1 + y2
+def create_combined(data):
+    X = []
+    y = []
+
+    for el in data:
+        X += el[0]
+        y += el[1]
+
 
     combined = list(zip(X,y))
     random.shuffle(combined)
