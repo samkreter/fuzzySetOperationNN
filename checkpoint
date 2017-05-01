@@ -1,2 +1,2 @@
-model_checkpoint_path: "model_reg_add.ckpt"
-all_model_checkpoint_paths: "model_reg_add.ckpt"
+model_checkpoint_path: "model_noreg_combined.ckpt"
+all_model_checkpoint_paths: "model_noreg_combined.ckpt"
