@@ -46,8 +46,10 @@ def generate_training_10(wideValue=.1):
 def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data',featureOp=False):
 
     f_op_map = {
-        'add':[1],
-        'sub':[0]
+        'add':[0,0],
+        'sub':[1,0],
+        'mul':[0,1],
+        'div':[1,1]
     }
 
 
@@ -105,6 +107,12 @@ if sys.argv[2] == "combined":
     X_sub_feat,y_sub_feat = generate_training_full(op='sub',featureOp=True)
     X_add_feat,y_add_feat = generate_training_full(op='add',featureOp=True)
     X,y = create_combined(X_sub_feat,y_sub_feat,X_add_feat,y_add_feat)
+elif sys.argv[2] == "combinedmul":
+    data1 = generate_training_full(op='sub',featureOp=True)
+    data2 = generate_training_full(op='add',featureOp=True)
+    data3 = generate_training_full(op='mul',featureOp=True)
+    data4 = generate_training_full(op='div',featureOp=True)
+    X,y = create_combined(X_sub_feat,y_sub_feat,X_add_feat,y_add_feat)
 elif sys.argv[2] == "sub":
     X,y = generate_training_full(op='sub',featureOp=False)
 else:
@@ -115,8 +123,8 @@ else:
 train_x, test_x, train_y, test_y = train_test_split(X,y,test_size=.2,random_state = 1)
 
 
-n_nodes_hl1 = 20
-n_nodes_hl2 = 20
+n_nodes_hl1 = int(sys.argv[3])
+n_nodes_hl2 = int(sys.argv[3])
 n_nodes_hl3 = 20
 
 n_classes = 4
@@ -169,7 +177,7 @@ def train_network(x):
             beta*tf.nn.l2_loss(weights['output_layer']))
 
 
-    file = File(sys.argv[1] + "_" + sys.argv[2] + "_log.csv")
+    file = File(sys.argv[1] + "_" + sys.argv[2] + "_" + sys.argv[3] + "_log.csv")
     saver = tf.train.Saver()
 
     optimizer = tf.train.AdamOptimizer().minimize(cost)
@@ -194,10 +202,10 @@ def train_network(x):
 
 
         if epoch > 0:
-            saver.restore(sess,"./model_" + sys.argv[1] + "_" + sys.argv[2] + ".ckpt")
+            saver.restore(sess,"./model_" + sys.argv[1] + "_" + sys.argv[2]  + "_" + sys.argv[3]+ ".ckpt")
 
 
-        print("Starting: " + sys.argv[1] + "_" + sys.argv[2])
+        print("Starting: " + sys.argv[1] + "_" + sys.argv[2]+ "_" + sys.argv[3])
 
         while epoch < n_epochs:
 
@@ -220,7 +228,7 @@ def train_network(x):
             with open("epoch.log","wb") as f:
                 pickle.dump(epoch,f)
             #errors.append(c)
-            saver.save(sess,"model_" + sys.argv[1] + "_" + sys.argv[2] + ".ckpt")
+            saver.save(sess,"model_" + sys.argv[1] + "_" + sys.argv[2]+ "_" + sys.argv[3] + ".ckpt")
             epoch += 1
 
         os.remove("epoch.log")
