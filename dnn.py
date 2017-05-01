@@ -113,6 +113,10 @@ elif sys.argv[2] == "combinedmul":
     data3 = generate_training_full(op='mul',featureOp=True)
     data4 = generate_training_full(op='div',featureOp=True)
     X,y = create_combined(X_sub_feat,y_sub_feat,X_add_feat,y_add_feat)
+elif sys.argv[2] == "div":
+    X,y = generate_training_full(op='div',featureOp=False)
+elif sys.argv[2] == "mul":
+    X,y = generate_training_full(op='mul',featureOp=False)
 elif sys.argv[2] == "sub":
     X,y = generate_training_full(op='sub',featureOp=False)
 else:
