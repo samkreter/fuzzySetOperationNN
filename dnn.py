@@ -259,14 +259,14 @@ def train_network(x):
 def getAccuarcy(preds,truths):
     correct = 0
     for pred,truth in zip(preds,truths):
-        print(pred)
-        print(truth)
-        t = input()
+
         pred = list(map(round,pred))
         truth = list(map(round,truth))
         if pred == truth:
             correct += 1
-
+        print(pred)
+        print(truth)
+        t = input()
     return (correct / len(preds)) * 100
 
 
@@ -285,8 +285,7 @@ def test_network():
 
 
         preds = sess.run(pred, feed_dict={x:test_x})
-        print("hello")
-        print(preds)
+   
 
         accuracy = getAccuarcy(preds,test_y)
         print(accuracy)
