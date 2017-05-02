@@ -4,7 +4,7 @@ import sys
 
 tests = ["20"]
 
-regs = ['div','combinedmul']
+regs = ['combinedmul']
 
 
 

@@ -144,8 +144,8 @@ class AlphaOps:
         return fNum1
 
 a = AlphaOps("add").alphaCuts
-# A = [.1,.3,.5]
-# B = [.3,.5,.7]
+A = [8.56,10,11.45]
+B = [.3,.5,.7]
 
 # f = a([A,B])
 

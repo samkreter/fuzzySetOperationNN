@@ -87,9 +87,10 @@ def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data',
 
 
                 label = list(map(s_round,alpha([A,B])))
-
                 samples.append(add_feature + A + B)
                 labels.append(label)
+
+
 
         with open(DATA_FOLDER + filename + "_" + op + "_" + str(featureOp) + ".pickle",'wb') as f:
             pickle.dump((samples,labels),f)
@@ -111,6 +112,9 @@ def create_combined(data):
 
     X,y = zip(*combined)
 
+    print(X[0])
+    print(y[0])
+
     return X,y
 
 
@@ -123,7 +127,7 @@ elif sys.argv[2] == "combinedmul":
     data2 = generate_training_full(op='add',featureOp=True)
     data3 = generate_training_full(op='mul',featureOp=True)
     data4 = generate_training_full(op='div',featureOp=True)
-    X,y = create_combined(X_sub_feat,y_sub_feat,X_add_feat,y_add_feat)
+    X,y = create_combined([data1,data2,data3,data4])
 elif sys.argv[2] == "div":
     X,y = generate_training_full(op='div',featureOp=False)
 elif sys.argv[2] == "mul":
