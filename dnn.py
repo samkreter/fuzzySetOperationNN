@@ -278,10 +278,13 @@ def test_network():
         sess.run(tf.initialize_all_variables())
 
         #saver.restore(sess,"model_" + sys.argv[1] + "_" + sys.argv[2]  + "_" + sys.argv[3]+ ".ckpt")
-        saver.restore(sess,"model_nonreg_div_20.ckpt")
+        saver.restore(sess,"./model_nonreg_div_20.ckpt")
 
 
         preds = sess.run(pred, feed_dict={x:test_x})
+        print("hello")
+        print(preds)
+
         accuracy = getAccuarcy(preds,test_y)
         print(accuracy)
         # all_vars = tf.get_collection('vars')
