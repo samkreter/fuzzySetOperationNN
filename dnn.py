@@ -142,15 +142,15 @@ else:
 train_x, test_x, train_y, test_y = train_test_split(X,y,test_size=.2,random_state = 1)
 
 
-n_nodes_hl1 = int(sys.argv[3])
-n_nodes_hl2 = int(sys.argv[3])
+n_nodes_hl1 = 20
+n_nodes_hl2 = 20
 n_nodes_hl3 = 20
 
 n_classes = 4
 
 
-# x = tf.placeholder('float',[None,len(train_x[0])])
-# y = tf.placeholder('float',[None,4])
+x = tf.placeholder('float',[None,len(train_x[0])])
+y = tf.placeholder('float',[None,4])
 
 x = tf.placeholder('float')
 y = tf.placeholder('float')
@@ -267,27 +267,33 @@ def getAccuarcy(preds,truths):
     return (correct / len(preds)) * 100
 
 
-def test_network(x):
+def test_network():
+
+    pred = neural_net_model(x)
+
     saver = tf.train.Saver()
 
 
     with tf.Session() as sess:
-        #sess.run(tf.initialize_all_variables())
+        sess.run(tf.initialize_all_variables())
 
-        saver.restore(sess,"model.ckpt")
+        #saver.restore(sess,"model_" + sys.argv[1] + "_" + sys.argv[2]  + "_" + sys.argv[3]+ ".ckpt")
+        saver.restore(sess,"model_nonreg_div_20.ckpt")
 
-        all_vars = tf.get_collection('vars')
-        for v in all_vars:
-            v_ = sess.run(v)
-            print(v_)
 
-        #preds = sess.run(pred, feed_dict={x:test_x})
+        preds = sess.run(pred, feed_dict={x:test_x})
+        accuracy = getAccuarcy(preds,test_y)
+        print(accuracy)
+        # all_vars = tf.get_collection('vars')
+        # for v in all_vars:
+        #     v_ = sess.run(v)
+        #     print(v_)
 
-        #print(getAccuarcy(preds,test_y))
+
 
 if __name__ == '__main__':
 
-    train_network(x)
-    #test_network(x)
+    #train_network(x)
+    test_network()
 
 
