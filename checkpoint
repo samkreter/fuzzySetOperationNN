@@ -1,2 +1,2 @@
-model_checkpoint_path: "model_nonreg_mul_100.ckpt"
-all_model_checkpoint_paths: "model_nonreg_mul_100.ckpt"
+model_checkpoint_path: "model_nonreg_mul_20.ckpt"
+all_model_checkpoint_paths: "model_nonreg_mul_20.ckpt"
