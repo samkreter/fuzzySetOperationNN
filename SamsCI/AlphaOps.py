@@ -51,8 +51,7 @@ class AlphaOps:
         if c != 0:
             c = 1 / d
 
-        result = self.mul(a,b,d,c)
-        return
+        return self.mul(a,b,d,c)
 
     #Base compliment operator
     def comp(self,a,b):

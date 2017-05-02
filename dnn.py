@@ -72,9 +72,20 @@ def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data',
 
 
         for b1 in bs:
+            # if b1 == 0:
+            #     continue
+
             for b2 in bs:
+
+                # if b2 == 0:
+                #     continue
+
+
+
                 A = list(map(s_round,[b1 - wideValue, b1, b1, b1 + wideValue]))
                 B = list(map(s_round,[b2 - wideValue, b2, b2, b2 + wideValue]))
+
+
                 label = list(map(s_round,alpha([A,B])))
 
                 samples.append(add_feature + A + B)
