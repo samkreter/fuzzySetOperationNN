@@ -259,6 +259,9 @@ def train_network(x):
 def getAccuarcy(preds,truths):
     correct = 0
     for pred,truth in zip(preds,truths):
+        print(pred)
+        print(truth)
+        t = input()
         pred = list(map(round,pred))
         truth = list(map(round,truth))
         if pred == truth:
