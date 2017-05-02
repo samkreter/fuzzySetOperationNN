@@ -45,7 +45,14 @@ class AlphaOps:
         return [min(a*c,a*d,b*c,b*d), max(a*c,a*d,b*c,b*d)]
 
     def div(self,a,b,c,d):
-        return self.mul(a,b,1/d,1/c)
+        if d != 0:
+            d = 1 / d
+
+        if c != 0:
+            c = 1 / d
+
+        result = self.mul(a,b,d,c)
+        return
 
     #Base compliment operator
     def comp(self,a,b):

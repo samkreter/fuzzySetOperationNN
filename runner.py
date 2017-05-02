@@ -2,9 +2,9 @@ import os
 import sys
 
 
-tests = ["100","20"]
+tests = ["20"]
 
-regs = ['mul','div','combinedmul']
+regs = ['div','combinedmul']
 
 
 
