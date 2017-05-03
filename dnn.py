@@ -72,8 +72,8 @@ def gen_full(bs,add_feature,op,wideValue=2):
 def generate_training(wideValue=2,op="add",force=False,filename='gen_data',featureOp=False):
 
     f_op_map = {
-        'add':[0,0],
-        'sub':[1,0],
+        'add':[1],
+        'sub':[0],
         'mul':[0,1],
         'div':[1,1]
     }
@@ -126,9 +126,9 @@ def create_combined(data):
 
 
 if sys.argv[2] == "combined":
-    X_sub_feat,y_sub_feat = generate_training(op='sub',featureOp=True)
-    X_add_feat,y_add_feat = generate_training(op='add',featureOp=True)
-    X,y = create_combined(X_sub_feat,y_sub_feat,X_add_feat,y_add_feat)
+    subs = generate_training(op='sub',featureOp=True)
+    adds = generate_training(op='add',featureOp=True)
+    X,y = create_combined([subs,adds])
 elif sys.argv[2] == "combinedmul":
     data1 = generate_training(op='sub',featureOp=True)
     data2 = generate_training(op='add',featureOp=True)
