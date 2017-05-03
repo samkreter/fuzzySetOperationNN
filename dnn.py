@@ -282,6 +282,7 @@ def getAccuarcy(preds,truths):
         if i  == prints:
             print("Pred: ", pred)
             print("Truth: ",truth)
+            #show_result(pred,truth)
 
         if pred == truth:
             correct += 1
@@ -289,6 +290,26 @@ def getAccuarcy(preds,truths):
         i += 1
 
     return (correct / len(preds)) * 100
+
+
+def show_result(pred,truth):
+
+
+    m_pred = MemFunc('trap',pred)
+    m_truth = MemFunc('trap',truth)
+
+    print(m_truth.memFunc(.7))
+
+    X = np.arange(0,1.05, .05)
+
+    plt.plot(X,[m_pred.memFunc(i) for i in X ],c='k',linewidth=4)
+    plt.plot(X,[m_truth.memFunc(i) for i in X], c='b',linewidth=4)
+
+    plt.xlim([-3,3])
+    plt.ylim([0,1])
+    #plt.legend(handles=[l1])
+    plt.title("Truth VS Prediction")
+    plt.show()
 
 
 def test_network():
@@ -301,25 +322,25 @@ def test_network():
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
 
-        #saver.restore(sess,"model_" + sys.argv[1] + "_" + sys.argv[2]  + "_" + sys.argv[3]+ ".ckpt")
-        saver.restore(sess,"./model_nonreg_div_20.ckpt")
+        saver.restore(sess,"./third_run_tests/model_" + sys.argv[1] + "_" + sys.argv[2]  + "_" + sys.argv[3]+ ".ckpt")
 
 
         preds = sess.run(pred, feed_dict={x:test_x})
 
+        with open(sys.argv[1] + "_" + sys.argv[2] + "_" + sys.argv[3] + "_preds.pickle","wb") as f:
+            pickle.dump((preds,test_y))
 
-        accuracy = getAccuarcy(preds,test_y)
-        print(accuracy)
-        # all_vars = tf.get_collection('vars')
-        # for v in all_vars:
-        #     v_ = sess.run(v)
-        #     print(v_)
+
+
+        #accuracy = getAccuarcy(preds,test_y)
+        #print(accuracy)
+
 
 
 
 if __name__ == '__main__':
 
-    train_network(x)
-    #test_network()
+    #train_network(x)
+    test_network()
 
 
