@@ -322,12 +322,12 @@ def test_network():
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
 
-        saver.restore(sess,"./second_run_tests/model_" + sys.argv[1] + "_" + sys.argv[2]  + "_" + sys.argv[3]+ ".ckpt")
+        saver.restore(sess,"./first_run_tests/model_" + sys.argv[1] + "_" + sys.argv[2] + ".ckpt")
 
 
         preds = sess.run(pred, feed_dict={x:test_x})
 
-        with open(sys.argv[1] + "_" + sys.argv[2] + "_" + sys.argv[3] + "_preds.pickle","wb") as f:
+        with open(sys.argv[1] + "_" + sys.argv[2] +  "_preds.pickle","wb") as f:
             pickle.dump((preds,test_y),f)
 
 

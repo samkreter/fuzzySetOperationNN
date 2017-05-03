@@ -3,11 +3,13 @@ import sys
 
 
 
-tests = ['combinedmul']
+tests = ['add','sub','combined']
+regs = ['noreg','reg']
 
 
 
 
 for test in tests:
-    os.system("python3 dnn.py nonreg " +  test + " 20")
-    print("DONE!")
+    for reg in regs
+        os.system("python3 dnn.py " + reg + " " +  test)
+        print("DONE!")
