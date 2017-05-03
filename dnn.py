@@ -72,8 +72,8 @@ def gen_full(bs,add_feature,op,wideValue=2):
 def generate_training(wideValue=2,op="add",force=False,filename='gen_data',featureOp=False):
 
     f_op_map = {
-        'add':[1],
-        'sub':[0],
+        'add':[0,0],
+        'sub':[1,0],
         'mul':[0,1],
         'div':[1,1]
     }
@@ -292,24 +292,7 @@ def getAccuarcy(preds,truths):
     return (correct / len(preds)) * 100
 
 
-def show_result(pred,truth):
 
-
-    m_pred = MemFunc('trap',pred)
-    m_truth = MemFunc('trap',truth)
-
-    print(m_truth.memFunc(.7))
-
-    X = np.arange(0,1.05, .05)
-
-    plt.plot(X,[m_pred.memFunc(i) for i in X ],c='k',linewidth=4)
-    plt.plot(X,[m_truth.memFunc(i) for i in X], c='b',linewidth=4)
-
-    plt.xlim([-3,3])
-    plt.ylim([0,1])
-    #plt.legend(handles=[l1])
-    plt.title("Truth VS Prediction")
-    plt.show()
 
 
 def test_network():
