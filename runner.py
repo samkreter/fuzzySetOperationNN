@@ -3,7 +3,7 @@ import sys
 
 
 
-tests = ['add','sub','mul','div']
+tests = ['mul','div']
 
 
 
