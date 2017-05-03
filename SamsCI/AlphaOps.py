@@ -86,6 +86,8 @@ class AlphaOps:
             #Convert the point values from the alphas into a 3 point membership function
             fNum1 = [points[0][0],points[3][0],points[3][1],points[0][1]]
 
+            print(points)
+
             #Graph the resluts of the operation
             if(show):
                 m2 = MemFunc('trap',fNum1)
@@ -125,6 +127,7 @@ class AlphaOps:
             #Comment out for regular fuzzy sets
             fNum1 = [points[0][0],points[3][0],points[3][1],points[0][1]]
 
+
             points = []
 
             mOut = MemFunc('trap',fNum1)
@@ -143,12 +146,12 @@ class AlphaOps:
 
         return fNum1
 
-a = AlphaOps("add").alphaCuts
-A = [8.56,10,11.45]
-B = [.3,.5,.7]
+# a = AlphaOps("add").alphaCuts
+# A = [.432,.433,.433,.434]
+# B = [.443,.444,.444,.445]
 
 # f = a([A,B])
-
+# print(f)
 
 # m1 = MemFunc('tri',A)
 # m2 = MemFunc('tri',B)

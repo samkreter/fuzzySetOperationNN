@@ -13,37 +13,63 @@ import sys
 from SamsCI import *
 
 
-DATA_FOLDER = "data/"
+DATA_FOLDER = "data2/"
 
 
 REGUALIZE = True if sys.argv[1] == "reg" else False
 
 
 def s_round(a):
-    return int((a * 10) + 0.5) / 10.0
+    return int((a * 1000) + 0.5) / 1000.0
 
-def generate_training_10(wideValue=.1):
+def gen_10(bs,add_feature,op,wideValue=.001):
     samples = []
     labels = []
     fNumbers = []
 
+
+    alpha = AlphaOps(op).alphaCuts
+
     #compute values
-    for b in np.arange(0,1.1,.1):
+    for b in bs:
         a = s_round(max(0,b - wideValue))
         c = s_round(min(1,b + wideValue))
         b = s_round(b)
         fNumbers.append([a,b,b,c])
 
-
     #Compute pairs
     for A in fNumbers:
         for B in fNumbers:
-            samples.append(A + B)
-            labels.append([min(1,s_round(i[0] + i[1])) for i in zip(A,B) ])
+            samples.append(add_feature + A + B)
+            label = list(map(lambda x: min(1,max(0,x)),alpha([A,B])))
+            labels.append(label)
 
     return samples,labels
 
-def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data',featureOp=False):
+
+def gen_full(bs,add_feature,op,wideValue=2):
+    samples = []
+    labels = []
+
+    alpha = AlphaOps(op).alphaCuts
+
+    for b1 in bs:
+
+        for b2 in bs:
+
+
+            A = list(map(s_round,[b1 - wideValue, b1, b1, b1 + wideValue]))
+            B = list(map(s_round,[b2 - wideValue, b2, b2, b2 + wideValue]))
+
+
+            label = list(map(s_round,alpha([A,B])))
+            samples.append(add_feature + A + B)
+            labels.append(label)
+
+    return samples,labels
+
+
+def generate_training(wideValue=2,op="add",force=False,filename='gen_data',featureOp=False):
 
     f_op_map = {
         'add':[0,0],
@@ -65,31 +91,12 @@ def generate_training_full(wideValue=2,op="add",force=False,filename='gen_data',
 
     except:
         print("Generating: " + filename + "_" + op + "_" + str(featureOp) + ".pickle")
-        samples = []
-        labels = []
-        alpha = AlphaOps(op).alphaCuts
-        bs = random.sample(list(np.arange(0,10,.01)),500)
 
 
-        for b1 in bs:
-            # if b1 == 0:
-            #     continue
-
-            for b2 in bs:
-
-                # if b2 == 0:
-                #     continue
+        bs = random.sample(list(np.arange(0,1,.001)),500)
 
 
-
-                A = list(map(s_round,[b1 - wideValue, b1, b1, b1 + wideValue]))
-                B = list(map(s_round,[b2 - wideValue, b2, b2, b2 + wideValue]))
-
-
-                label = list(map(s_round,alpha([A,B])))
-                samples.append(add_feature + A + B)
-                labels.append(label)
-
+        samples,labels = gen_10(bs,add_feature,op)
 
 
         with open(DATA_FOLDER + filename + "_" + op + "_" + str(featureOp) + ".pickle",'wb') as f:
@@ -119,38 +126,38 @@ def create_combined(data):
 
 
 if sys.argv[2] == "combined":
-    X_sub_feat,y_sub_feat = generate_training_full(op='sub',featureOp=True)
-    X_add_feat,y_add_feat = generate_training_full(op='add',featureOp=True)
+    X_sub_feat,y_sub_feat = generate_training(op='sub',featureOp=True)
+    X_add_feat,y_add_feat = generate_training(op='add',featureOp=True)
     X,y = create_combined(X_sub_feat,y_sub_feat,X_add_feat,y_add_feat)
 elif sys.argv[2] == "combinedmul":
-    data1 = generate_training_full(op='sub',featureOp=True)
-    data2 = generate_training_full(op='add',featureOp=True)
-    data3 = generate_training_full(op='mul',featureOp=True)
-    data4 = generate_training_full(op='div',featureOp=True)
+    data1 = generate_training(op='sub',featureOp=True)
+    data2 = generate_training(op='add',featureOp=True)
+    data3 = generate_training(op='mul',featureOp=True)
+    data4 = generate_training(op='div',featureOp=True)
     X,y = create_combined([data1,data2,data3,data4])
 elif sys.argv[2] == "div":
-    X,y = generate_training_full(op='div',featureOp=False)
+    X,y = generate_training(op='div',featureOp=False)
 elif sys.argv[2] == "mul":
-    X,y = generate_training_full(op='mul',featureOp=False)
+    X,y = generate_training(op='mul',featureOp=False)
 elif sys.argv[2] == "sub":
-    X,y = generate_training_full(op='sub',featureOp=False)
+    X,y = generate_training(op='sub',featureOp=False)
 else:
-    X,y = generate_training_full(op='add',featureOp=False)
+    X,y = generate_training(op='add',featureOp=False)
 
 
 
 train_x, test_x, train_y, test_y = train_test_split(X,y,test_size=.2,random_state = 1)
 
 
-n_nodes_hl1 = int(sys.argv[3])
-n_nodes_hl2 = int(sys.argv[3])
+n_nodes_hl1 = 20
+n_nodes_hl2 = 20
 n_nodes_hl3 = 20
 
 n_classes = 4
 
 
-# x = tf.placeholder('float',[None,len(train_x[0])])
-# y = tf.placeholder('float',[None,4])
+x = tf.placeholder('float',[None,len(train_x[0])])
+y = tf.placeholder('float',[None,4])
 
 x = tf.placeholder('float')
 y = tf.placeholder('float')
@@ -224,7 +231,10 @@ def train_network(x):
             saver.restore(sess,"./model_" + sys.argv[1] + "_" + sys.argv[2]  + "_" + sys.argv[3]+ ".ckpt")
 
 
+        test = [.432,.433,.433,.434,.443,.444,.444,.445]
+
         print("Starting: " + sys.argv[1] + "_" + sys.argv[2]+ "_" + sys.argv[3])
+        print("Dim: ",len(train_x))
 
         while epoch < n_epochs:
 
@@ -233,8 +243,11 @@ def train_network(x):
 
 
 
+
             #if epoch % printer == 0:
-                #print(sess.run(pred,feed_dict={x:[test]}))
+                #print("test: ",sess.run(pred,feed_dict={x:[test]}))
+                #print("SOl: ",0.875, 0.877, 0.877, 0.879)
+
             preds = sess.run(pred, feed_dict={x:test_x})
             accuracy = getAccuarcy(preds,test_y)
             print(accuracy)
@@ -257,37 +270,56 @@ def train_network(x):
 
 
 def getAccuarcy(preds,truths):
+    prints = random.randint(0,len(preds))
     correct = 0
+    i = 0
+
     for pred,truth in zip(preds,truths):
-        pred = list(map(round,pred))
-        truth = list(map(round,truth))
+
+        pred = [ s_round(round(i,3)) for i in pred]
+        truth = [ s_round(round(i,3)) for i in truth]
+
+        if i  == prints:
+            print("Pred: ", pred)
+            print("Truth: ",truth)
+
         if pred == truth:
             correct += 1
+
+        i += 1
 
     return (correct / len(preds)) * 100
 
 
-def test_network(x):
+def test_network():
+
+    pred = neural_net_model(x)
+
     saver = tf.train.Saver()
 
 
     with tf.Session() as sess:
-        #sess.run(tf.initialize_all_variables())
+        sess.run(tf.initialize_all_variables())
 
-        saver.restore(sess,"model.ckpt")
+        #saver.restore(sess,"model_" + sys.argv[1] + "_" + sys.argv[2]  + "_" + sys.argv[3]+ ".ckpt")
+        saver.restore(sess,"./model_nonreg_div_20.ckpt")
 
-        all_vars = tf.get_collection('vars')
-        for v in all_vars:
-            v_ = sess.run(v)
-            print(v_)
 
-        #preds = sess.run(pred, feed_dict={x:test_x})
+        preds = sess.run(pred, feed_dict={x:test_x})
 
-        #print(getAccuarcy(preds,test_y))
+
+        accuracy = getAccuarcy(preds,test_y)
+        print(accuracy)
+        # all_vars = tf.get_collection('vars')
+        # for v in all_vars:
+        #     v_ = sess.run(v)
+        #     print(v_)
+
+
 
 if __name__ == '__main__':
 
     train_network(x)
-    #test_network(x)
+    #test_network()
 
 
