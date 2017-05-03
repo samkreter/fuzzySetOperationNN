@@ -3,7 +3,7 @@ import sys
 
 
 
-tests = ['mul','div']
+tests = ['combinedmul']
 
 
 
