@@ -328,7 +328,7 @@ def test_network():
         preds = sess.run(pred, feed_dict={x:test_x})
 
         with open(sys.argv[1] + "_" + sys.argv[2] + "_" + sys.argv[3] + "_preds.pickle","wb") as f:
-            pickle.dump((preds,test_y))
+            pickle.dump((preds,test_y),f)
 
 
 
